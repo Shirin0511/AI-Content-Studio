@@ -52,7 +52,7 @@ if generate_button:
                 st.download_button(
                     label ="Downlaod as .txt",
                     data = result,
-                    file_name = f"{content_type.lower().repalce(' ','_')}.txt",
+                    file_name = f"{content_type.lower().replace(' ','_')}.txt",
                     mime="text/plain",
                     use_container_width=True
                 )
