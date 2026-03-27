@@ -34,7 +34,7 @@ if generate_button:
         with st.spinner("Generating Content...."):
             result = generate_content(content_type, topic)
 
-            st.session_state.append(
+            st.session_state.history.append(
                 {
                     "type" : content_type,
                     "topic" : topic,
