@@ -24,6 +24,9 @@ content_type = st.selectbox(
 
 generate_button = st.button("Generate", type="primary", use_container_width=True)
 
+if "history" not in st.session_state:
+    st.session_state.history=[]
+
 if generate_button:
     if not topic.strip():
         st.warning("Please enter a topic first")
@@ -31,6 +34,37 @@ if generate_button:
         with st.spinner("Generating Content...."):
             result = generate_content(content_type, topic)
 
+            st.session_state.append(
+                {
+                    "type" : content_type,
+                    "topic" : topic,
+                    "result" : result
+                }
+            )
+
             st.divider()
             st.subheader("Generated Content")
             st.write(result)
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.download_button(
+                    label ="Downlaod as .txt",
+                    data = result,
+                    file_name = f"{content_type.lower().repalce(' ','_')}.txt",
+                    mime="text/plain",
+                    use_container_width=True
+                )
+
+            with col2:
+                st.code(result, language = None)    
+
+
+if st.session_state.history:
+    st.divider()
+    st.subheader("Generation History")
+
+    for i, item in enumerate(reversed(st.session_state.history)):
+        with st.expander(f"{item['type']} - {item['topic']}"):
+            st.write(item['result'])
