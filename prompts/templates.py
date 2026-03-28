@@ -3,10 +3,18 @@ def get_prompts(content_type: str, topic:str) -> str:
 
         "Blog Post": f"""Write a professional blog post about: {topic}
 
-Structure it with:
-- An engaging introduction
-- 3-4 main sections with subheadings
-- A clear conclusion
+Use proper markdown formatting:
+- Title as # Heading (H1)
+- Sections as ## Heading (H2)
+- No bold text for headings, use # instead
+
+Structure:
+- # Title
+- Introduction paragraph
+- ## Section 1
+- ## Section 2  
+- ## Section 3
+- ## Conclusion
 
 Tone: professional, informative, engaging.
 Length: 400-500 words.""",
