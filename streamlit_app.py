@@ -44,21 +44,16 @@ if generate_button:
 
             st.divider()
             st.subheader("Generated Content")
-            st.write(result)
+            st.code(result, language=None)
+            st.download_button(
+                label="Download as .txt",
+                data = result,
+                file_name = f"{content_type.lower().replace(" ","_")}.txt",
+                mime = "text/plain",
+                use_container_width = True
+            )
 
-            col1, col2 = st.columns(2)
-
-            with col1:
-                st.download_button(
-                    label ="Downlaod as .txt",
-                    data = result,
-                    file_name = f"{content_type.lower().replace(' ','_')}.txt",
-                    mime="text/plain",
-                    use_container_width=True
-                )
-
-            with col2:
-                st.code(result, language = None)    
+              
 
 
 if st.session_state.history:
@@ -67,4 +62,12 @@ if st.session_state.history:
 
     for i, item in enumerate(reversed(st.session_state.history)):
         with st.expander(f"{item['type']} - {item['topic']}"):
-            st.write(item['result'])
+            st.code(item['result'], language=None)
+            st.download_button(
+                label = "Download as .txt",
+                data = item['result'],
+                file_name = f"{item['type'].lower().replace(' ','_')}.txt",
+                mime= "text/plain",
+                use_container_width= True,
+                key=f"download_{i}" 
+            )
