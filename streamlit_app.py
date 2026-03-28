@@ -3,14 +3,11 @@ from utils.generator import generate_content
 import json
 import streamlit.components.v1 as components
 
-
-
 st.set_page_config(
     page_title="AI Content Studio",
     page_icon="✍️",
     layout="centered"
 )
-
 
 st.markdown("""
 <style>
@@ -102,70 +99,65 @@ def display_result(content_type, topic, result, download_key):
         key=download_key
     )
 
+
 st.markdown("## ✍️ AI Content Studio")
 st.caption("Generate professional content using AI in seconds")
 st.divider()
 
-topic= st.text_input(
+topic = st.text_input(
     "Enter the topic",
-    placeholder="eg. The Future of AI"
+    placeholder="e.g. The Future of AI"
 )
-
 
 content_type = st.selectbox(
     "Choose content type",
-    ["Blog Post","LinkedIn Caption","Cold Email"]
+    ["Blog Post", "LinkedIn Caption", "Cold Email"]
 )
 
 generate_button = st.button("Generate", type="primary", use_container_width=True)
 
 if "history" not in st.session_state:
-    st.session_state.history=[]
+    st.session_state.history = []
+
+if st.session_state.history and not isinstance(st.session_state.history[0], dict):
+    st.session_state.history = []
 
 if generate_button:
     if not topic.strip():
-        st.warning("Please enter a topic first")
+        st.warning("Please enter a topic first.")
     else:
-        with st.spinner("Generating Content...."):
+        with st.spinner("Generating content..."):
             result = generate_content(content_type, topic)
 
         if result.startswith("Error:"):
-            st.error(result)    
-        
-        else: 
-            st.session_state.history.append(
-                {
-                        "type" : content_type,
-                        "topic" : topic,
-                        "result" : result
-                }
-            )
-      
+            st.error(result)
+        else:
+            st.session_state.history.append({
+                "type": content_type,
+                "topic": topic,
+                "result": result
+            })
+
 if st.session_state.history:
     latest = st.session_state.history[-1]
     st.divider()
-    st.markdown("#### Generation Content")
-
+    st.markdown("#### Generated Content")
     display_result(
-        latest['topic'],
-        latest['type'],
-        latest['result'],
-        download_key= "download_main"
+        latest["type"],
+        latest["topic"],
+        latest["result"],
+        download_key=f"download_main_{len(st.session_state.history)}"
     )
 
-
 if len(st.session_state.history) > 1:
-
     st.divider()
-    col1, col2 = st.columns([3,1])
-    
+    col1, col2 = st.columns([3, 1])
     with col1:
         st.markdown("#### Generation History")
-
     with col2:
         if st.button("Clear History", use_container_width=True):
-            st.session_state.history = st.session_state.history[-1:]  
-            st.rerun()  
+            st.session_state.history = st.session_state.history[-1:]
+            st.rerun()
 
     for i, item in enumerate(reversed(st.session_state.history[:-1])):
         with st.expander(f"{item['type']} — {item['topic']}"):
@@ -173,5 +165,5 @@ if len(st.session_state.history) > 1:
                 item["type"],
                 item["topic"],
                 item["result"],
-                download_key=f"download_{i}"
+                download_key=f"download_history_{i}"
             )

@@ -42,7 +42,7 @@ def generate_content(content_type: str, topic:str) -> str:
         if "api_key" in error.lower():
             return "Error: Invalied API key."
         
-        if "model" in error.lower():
+        if "model_decommissioned" or "model not found" in error.lower():
             return "Error: Model Unavailable."
         
         else:
