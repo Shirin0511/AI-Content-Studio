@@ -129,13 +129,17 @@ if generate_button:
         with st.spinner("Generating Content...."):
             result = generate_content(content_type, topic)
 
-        st.session_state.history.append(
-            {
-                    "type" : content_type,
-                    "topic" : topic,
-                    "result" : result
-            }
-        )
+        if result.startswith("Error:"):
+            st.error(result)    
+        
+        else: 
+            st.session_state.history.append(
+                {
+                        "type" : content_type,
+                        "topic" : topic,
+                        "result" : result
+                }
+            )
       
 if st.session_state.history:
     latest = st.session_state.history[-1]
@@ -153,7 +157,15 @@ if st.session_state.history:
 if len(st.session_state.history) > 1:
 
     st.divider()
-    st.markdown("#### Generation History")
+    col1, col2 = st.columns([3,1])
+    
+    with col1:
+        st.markdown("#### Generation History")
+
+    with col2:
+        if st.button("Clear History", use_container_width=True):
+            st.session_state.history = st.session_state.history[-1:]  
+            st.rerun()  
 
     for i, item in enumerate(reversed(st.session_state.history[:-1])):
         with st.expander(f"{item['type']} — {item['topic']}"):
