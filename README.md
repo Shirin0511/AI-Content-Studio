@@ -1,13 +1,6 @@
 # ✍️ AI Content Studio
 
 > Generate professional blog posts, LinkedIn captions, and cold emails instantly using AI — powered by LLaMA 3 via Groq API.
-
-![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square&logo=python)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.35.0-FF4B4B?style=flat-square&logo=streamlit)
-![Groq](https://img.shields.io/badge/Groq-LLaMA_3-orange?style=flat-square)
-![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=flat-square&logo=docker)
-![Status](https://img.shields.io/badge/Status-In_Progress-yellow?style=flat-square)
-
 ---
 
 ## What It Does
