@@ -1,5 +1,5 @@
 import streamlit as st
-from utils.generator import generate_content
+from utils.generator import generate_content, generate_variations, improve_content
 import json
 import streamlit.components.v1 as components
 
@@ -35,6 +35,13 @@ st.markdown("""
     .stDownloadButton > button:hover { background-color: #6C63FF; color: white; }
     .stSelectbox > div > div { border-radius: 8px; }
     .stTextInput > div > div > input { border-radius: 8px; }
+    .stTextArea > div > div > textarea { border-radius: 8px; }
+    .stTabs [data-baseweb="tab-list"] { gap: 8px; }
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 8px;
+        padding: 0.4rem 1rem;
+        font-weight: 500;
+    }
     .badge {
         display: inline-block;
         background-color: #ede9ff;
@@ -44,6 +51,12 @@ st.markdown("""
         font-size: 0.75rem;
         font-weight: 600;
         margin-bottom: 0.8rem;
+    }
+    .word-count {
+        font-size: 0.78rem;
+        color: #888;
+        margin-top: 0.3rem;
+        margin-bottom: 0.5rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -87,6 +100,9 @@ def copy_button(text):
 
 def display_result(content_type, topic, result, download_key):
     st.markdown(f'<div class="badge">{content_type}</div>', unsafe_allow_html=True)
+    word_count = len(result.split())
+    st.markdown(f'<div class="word-count">{word_count} words</div>',
+                unsafe_allow_html=True)
     st.markdown(result)
     st.divider()
     copy_button(result)
@@ -104,66 +120,198 @@ st.markdown("## ✍️ AI Content Studio")
 st.caption("Generate professional content using AI in seconds")
 st.divider()
 
-topic = st.text_input(
-    "Enter the topic",
-    placeholder="e.g. The Future of AI"
-)
-
-content_type = st.selectbox(
-    "Choose content type",
-    ["Blog Post", "LinkedIn Caption", "Cold Email"]
-)
-
-generate_button = st.button("Generate", type="primary", use_container_width=True)
-
-if "history" not in st.session_state:
-    st.session_state.history = []
+# --- Session state init ---
+for key in ["history", "last_topic", "last_content_type", "variations"]:
+    if key not in st.session_state:
+        st.session_state[key] = [] if key in ["history", "variations"] else ""
 
 if st.session_state.history and not isinstance(st.session_state.history[0], dict):
     st.session_state.history = []
 
-if generate_button:
-    if not topic.strip():
-        st.warning("Please enter a topic first.")
-    else:
-        with st.spinner("Generating content..."):
-            result = generate_content(content_type, topic)
+# --- Main tabs ---
+tab_generate, tab_improve = st.tabs(["Generate Content", "Improve My Draft"])
+
+# =====================
+# TAB 1 — GENERATE
+# =====================
+with tab_generate:
+    topic = st.text_input(
+        "Enter the topic",
+        placeholder="e.g. The Future of AI in Hiring"
+    )
+
+    content_type = st.selectbox(
+        "Choose content type",
+        ["Blog Post", "LinkedIn Caption", "Cold Email"]
+    )
+
+    col1, col2, col3 = st.columns([2, 2, 1])
+
+    with col1:
+        generate_btn = st.button(
+            "Generate",
+            type="primary",
+            use_container_width=True,
+            key="btn_generate"
+        )
+
+    with col2:
+        variations_btn = st.button(
+            "Generate 3 Variations",
+            use_container_width=True,
+            key="btn_variations"
+        )
+
+    with col3:
+        regenerate_btn = st.button(
+            "Regenerate",
+            use_container_width=True,
+            key="btn_regenerate",
+            disabled=not st.session_state.last_topic
+        )
+
+    # Generate single
+    if generate_btn:
+        if not topic.strip():
+            st.warning("Please enter a topic first.")
+        else:
+            st.session_state.variations = []
+            with st.spinner("Generating content..."):
+                result = generate_content(content_type, topic)
+
+            if result.startswith("Error:"):
+                st.error(result)
+            else:
+                st.session_state.last_topic = topic
+                st.session_state.last_content_type = content_type
+                st.session_state.history.append({
+                    "type": content_type,
+                    "topic": topic,
+                    "result": result
+                })
+
+    # Regenerate
+    if regenerate_btn and st.session_state.last_topic:
+        st.session_state.variations = []
+        with st.spinner("Regenerating..."):
+            result = generate_content(
+                st.session_state.last_content_type,
+                st.session_state.last_topic
+            )
 
         if result.startswith("Error:"):
             st.error(result)
         else:
             st.session_state.history.append({
-                "type": content_type,
-                "topic": topic,
+                "type": st.session_state.last_content_type,
+                "topic": st.session_state.last_topic,
                 "result": result
             })
 
-if st.session_state.history:
-    latest = st.session_state.history[-1]
-    st.divider()
-    st.markdown("#### Generated Content")
-    display_result(
-        latest["type"],
-        latest["topic"],
-        latest["result"],
-        download_key=f"download_main_{len(st.session_state.history)}"
+    # Generate 3 variations
+    if variations_btn:
+        if not topic.strip():
+            st.warning("Please enter a topic first.")
+        else:
+            st.session_state.variations = []
+            with st.spinner("Generating 3 variations... this takes a few seconds"):
+                st.session_state.variations = generate_variations(content_type, topic)
+                st.session_state.last_topic = topic
+                st.session_state.last_content_type = content_type
+
+    # Show variations
+    if st.session_state.variations:
+        st.divider()
+        st.markdown("#### 3 Variations")
+        v_tabs = st.tabs(["Variation 1", "Variation 2", "Variation 3"])
+        for i, (v_tab, variation) in enumerate(
+            zip(v_tabs, st.session_state.variations)
+        ):
+            with v_tab:
+                if variation.startswith("Error:"):
+                    st.error(variation)
+                else:
+                    display_result(
+                        content_type,
+                        topic,
+                        variation,
+                        download_key=f"download_variation_{i}"
+                    )
+
+    # Show latest single result
+    elif st.session_state.history:
+        latest = st.session_state.history[-1]
+        st.divider()
+        st.markdown("#### Generated Content")
+        display_result(
+            latest["type"],
+            latest["topic"],
+            latest["result"],
+            download_key=f"download_main_{len(st.session_state.history)}"
+        )
+
+    # History
+    if len(st.session_state.history) > 1:
+        st.divider()
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.markdown("#### Generation History")
+        with col2:
+            if st.button("Clear History", use_container_width=True):
+                st.session_state.history = st.session_state.history[-1:]
+                st.rerun()
+
+        for i, item in enumerate(reversed(st.session_state.history[:-1])):
+            with st.expander(f"{item['type']} — {item['topic']}"):
+                display_result(
+                    item["type"],
+                    item["topic"],
+                    item["result"],
+                    download_key=f"download_history_{i}"
+                )
+
+# =====================
+# TAB 2 — IMPROVE
+# =====================
+with tab_improve:
+    st.markdown("Paste your existing draft and get an improved version instantly.")
+
+    improve_content_type = st.selectbox(
+        "Content type of your draft",
+        ["Blog Post", "LinkedIn Caption", "Cold Email"],
+        key="improve_type"
     )
 
-if len(st.session_state.history) > 1:
-    st.divider()
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.markdown("#### Generation History")
-    with col2:
-        if st.button("Clear History", use_container_width=True):
-            st.session_state.history = st.session_state.history[-1:]
-            st.rerun()
+    draft = st.text_area(
+        "Paste your draft here",
+        placeholder="Paste your existing blog post, caption, or email...",
+        height=200
+    )
 
-    for i, item in enumerate(reversed(st.session_state.history[:-1])):
-        with st.expander(f"{item['type']} — {item['topic']}"):
-            display_result(
-                item["type"],
-                item["topic"],
-                item["result"],
-                download_key=f"download_history_{i}"
-            )
+    improve_btn = st.button(
+        "Improve My Draft",
+        type="primary",
+        use_container_width=True,
+        key="btn_improve"
+    )
+
+    if improve_btn:
+        if not draft.strip():
+            st.warning("Please paste your draft first.")
+        elif len(draft.split()) < 10:
+            st.warning("Draft is too short — please paste at least a few sentences.")
+        else:
+            with st.spinner("Improving your draft..."):
+                improved = improve_content(improve_content_type, draft)
+
+            if improved.startswith("Error:"):
+                st.error(improved)
+            else:
+                st.divider()
+                st.markdown("#### Improved Version")
+                display_result(
+                    improve_content_type,
+                    "Improved draft",
+                    improved,
+                    download_key="download_improved"
+                )

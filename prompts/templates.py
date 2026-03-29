@@ -1,6 +1,5 @@
-def get_prompts(content_type: str, topic:str) -> str:
-    prompts={
-
+def get_prompt(content_type: str, topic: str) -> str:
+    prompts = {
         "Blog Post": f"""Write a professional blog post about: {topic}
 
 Use proper markdown formatting:
@@ -12,7 +11,7 @@ Structure:
 - # Title
 - Introduction paragraph
 - ## Section 1
-- ## Section 2  
+- ## Section 2
 - ## Section 3
 - ## Conclusion
 
@@ -40,8 +39,22 @@ Structure:
 - Professional sign-off
 
 Tone: confident, concise, respectful.
-Length: 100-150 words."""
-
+Length: 100-150 words.""",
     }
 
-    return prompts.get(content_type,"")
+    return prompts.get(content_type, "")
+
+
+def get_improvement_prompt(content_type: str, draft: str) -> str:
+    return f"""You are a professional content editor. Improve the following {content_type} draft.
+
+Keep the core message and intent intact but make it:
+- More engaging and compelling
+- Better structured and cleaner
+- More professional in tone
+- Free of any grammatical issues
+
+Original draft:
+{draft}
+
+Return only the improved version, no explanations or commentary."""
