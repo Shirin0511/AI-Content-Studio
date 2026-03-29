@@ -1,13 +1,13 @@
 from groq import Groq
 from config import GROQ_API_KEY, MODEL_NAME, MAX_TOKENS
-from prompts.templates import get_prompts, get_improvement_prompt
+from prompts.templates import get_prompt, get_improvement_prompt
 
 
 client = Groq(api_key=GROQ_API_KEY)
 
 def generate_content(content_type: str, topic:str) -> str:
 
-    prompt = get_prompts(content_type,topic)
+    prompt = get_prompt(content_type,topic)
 
     if not prompt:
         return "Unsupported Content Type" 

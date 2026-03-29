@@ -1,5 +1,5 @@
 import streamlit as st
-from utils.generator import generate_content, generate_variations, improve_content
+from utils.generator import generate_content, improve_content
 import json
 import streamlit.components.v1 as components
 
@@ -121,9 +121,9 @@ st.caption("Generate professional content using AI in seconds")
 st.divider()
 
 # --- Session state init ---
-for key in ["history", "last_topic", "last_content_type", "variations"]:
+for key in ["history", "last_topic", "last_content_type"]:
     if key not in st.session_state:
-        st.session_state[key] = [] if key in ["history", "variations"] else ""
+        st.session_state[key] = [] if key =="history" else ""
 
 if st.session_state.history and not isinstance(st.session_state.history[0], dict):
     st.session_state.history = []
@@ -145,7 +145,7 @@ with tab_generate:
         ["Blog Post", "LinkedIn Caption", "Cold Email"]
     )
 
-    col1, col2, col3 = st.columns([2, 2, 1])
+    col1, col2 = st.columns([3, 1])
 
     with col1:
         generate_btn = st.button(
@@ -155,19 +155,13 @@ with tab_generate:
             key="btn_generate"
         )
 
-    with col2:
-        variations_btn = st.button(
-            "Generate 3 Variations",
-            use_container_width=True,
-            key="btn_variations"
-        )
 
-    with col3:
+    with col2:
         regenerate_btn = st.button(
             "Regenerate",
             use_container_width=True,
-            key="btn_regenerate",
-            disabled=not st.session_state.last_topic
+            key="btn_regenerate"
+        
         )
 
     # Generate single
@@ -208,38 +202,8 @@ with tab_generate:
                 "result": result
             })
 
-    # Generate 3 variations
-    if variations_btn:
-        if not topic.strip():
-            st.warning("Please enter a topic first.")
-        else:
-            st.session_state.variations = []
-            with st.spinner("Generating 3 variations... this takes a few seconds"):
-                st.session_state.variations = generate_variations(content_type, topic)
-                st.session_state.last_topic = topic
-                st.session_state.last_content_type = content_type
-
-    # Show variations
-    if st.session_state.variations:
-        st.divider()
-        st.markdown("#### 3 Variations")
-        v_tabs = st.tabs(["Variation 1", "Variation 2", "Variation 3"])
-        for i, (v_tab, variation) in enumerate(
-            zip(v_tabs, st.session_state.variations)
-        ):
-            with v_tab:
-                if variation.startswith("Error:"):
-                    st.error(variation)
-                else:
-                    display_result(
-                        content_type,
-                        topic,
-                        variation,
-                        download_key=f"download_variation_{i}"
-                    )
-
-    # Show latest single result
-    elif st.session_state.history:
+    
+    if st.session_state.history:
         latest = st.session_state.history[-1]
         st.divider()
         st.markdown("#### Generated Content")
