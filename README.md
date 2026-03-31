@@ -149,20 +149,31 @@ Result saved to session history
 
 ---
 
-## Roadmap
+## Future Improvements
 
-- [ ] Add ad copy as a content type
-- [ ] Tone selector (professional / casual / persuasive)
-- [ ] Export history as PDF
-- [ ] Deploy to Streamlit Cloud with public URL
-- [ ] Add usage analytics
+### Content & AI
+- Add tone selector — professional, casual, persuasive, humorous
+- Add content length control — short, medium, long
+- Add ad copy as a content type (Google Ads, Meta Ads)
+- Multi-language support — generate content in any language
+- SEO optimization mode — keyword injection for blog posts
+- Summarizer — paste a long article, get a short summary
+- Add RAG support — let users upload their own brand guidelines and generate content that stays on-brand
 
+### User Experience
+- Export full generation history as PDF
+- Save favourite generations to a personal library
+- Side-by-side diff view in Improve My Draft (original vs improved)
+- Character counter for platform limits (LinkedIn 3000, Twitter 280)
+- Dark mode support
+
+### Technical
+- Add user authentication so each user has their own history
+- Persistent storage with a database so history survives page refresh
+- Usage analytics — track generation count, most used content types
+- Rate limiting and abuse protection for production deployment
+- Unit tests for prompt templates and generator functions
 ---
 
-## License
-
-MIT License — free to use, modify, and distribute.
-
----
 
 <p align="center">Built with Python, Streamlit, and Groq API &nbsp;•&nbsp; <a href="https://console.groq.com">Get your free Groq API key</a></p>
